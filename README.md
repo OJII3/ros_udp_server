@@ -2,8 +2,9 @@
 
 ## Envitonment
 
-- `Ubuntu(wsl2)`: v20.04
-- `catkin`: 
+- `Ubuntu`(wsl2): v20.04
+- `catkin`: v0.9.2
+- `ROS`(noetic): v1.16.0
 
 ## How to use this
 
@@ -39,6 +40,23 @@ source /opt/ros/noetic/setup.bash
 mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws
 catkin build
+```
+
+```shell
+vim ~/.bashrc 
+```
+
+And edit like this.
+
+```diff
++ source /opt/ros/noetic/setup.bash
++ source ~/src/catkin_ws/devel/setup.bah
+```
+
+Then, install urg\_node
+
+```shell
+sudo apt install ros-noetic-urg-node
 ```
 
 ### Create Package
@@ -122,8 +140,15 @@ Then, build.
 catkin build --this
 ```
 
-Then, run
+Then, run.
+
+First, you have to open another terminal and run Master.
 
 ```shell
-source ~/src/catkin_ws/devel/setup.bash
+roscore
+```
+And then, run node.
+
+```shell
+rosrun udp_server ude_server_node
 ```
