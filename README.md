@@ -121,3 +121,9 @@ Then, build.
 ```shell
 catkin build --this
 ```
+
+Then, run
+
+```shell
+source ~/src/catkin_ws/devel/setup.bash
+```
