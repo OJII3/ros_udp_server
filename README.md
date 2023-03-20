@@ -69,10 +69,10 @@ sudo apt install ros-noetic-urg-node
 catkin create udp_server
 cd udp_server
 mkdir src
-vim udp_server.cpp
+vim udp_server_node.cpp
 ```
 
-Then edit `udp_server.cpp` like this.
+Then edit `udp_server_node.cpp` like this.
 
 ```cpp
 #include <ros/ros.h>

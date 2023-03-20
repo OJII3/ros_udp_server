@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>udp_server</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>The udp_server package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
@@ -32,7 +32,7 @@
   <!-- Dependencies can be catkin packages or system dependencies -->
   <!-- Examples: -->
   <!-- Use depend as a shortcut for packages that are both build and exec dependencies -->
-  <!--   <depend>roscpp</depend> -->
+  <depend>roscpp</depend>
   <!--   Note that this is equivalent to the following: -->
   <!--   <build_depend>roscpp</build_depend> -->
   <!--   <exec_depend>roscpp</exec_depend> -->

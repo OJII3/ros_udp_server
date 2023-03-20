@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "udp_server");
+    ros::init(argc, argv, "udp_server_node");
     ros::NodeHandle nh("~");
 
     std::string host = nh.param<std::string>("host", "localhost");
@@ -30,6 +30,8 @@ int main(int argc, char** argv)
       ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_buf.data());
 
     }
+
+    ros::spin();
 
     return 0;
 }
