@@ -8,7 +8,11 @@
 
 ## How to use this
 
-First of all, clone this repository and move to the root directory.
+First of all, clone this repository to your `catkin_ws` and move to the root directory.
+
+```shell
+git clone <git-repository-url> udp_server
+```
 
 Then, build.
 
