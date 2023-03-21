@@ -57,7 +57,7 @@ And edit like this.
 + source ~/src/catkin_ws/devel/setup.bah
 ```
 
-Then, install urg\_node
+Then, install urg-node
 
 ```shell
 sudo apt install ros-noetic-urg-node
@@ -75,18 +75,16 @@ vim udp_server_node.cpp
 Then edit `udp_server_node.cpp` like this.
 
 ```cpp
-#include <ros/ros.h>
+##include <ros/ros.h>
 #include <boost/asio.hpp>
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "udp_server");
+    ros::init(argc, argv, "udp_server_node");
     ros::NodeHandle nh("~");
 
-    std::string host;
-    int port;
-    nh.param<std::string>("host", host, "localhost");
-    nh.param<int>("port", port, 5000);
+    std::string host = nh.param<std::string>("host", "localhost");
+    int port = nh.param<int>("port", 5000);
 
     boost::asio::io_service io_service;
     boost::asio::ip::udp::socket socket(io_service);
@@ -100,16 +98,20 @@ int main(int argc, char** argv)
     boost::asio::ip::udp::endpoint remote_endpoint;
     while (ros::ok())
     {
-        boost::system::error_code error;
-        size_t len = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
-        if (error && error != boost::asio::error::message_size)
-            throw boost::system::system_error(error);
-        ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_buf.data());
+      boost::system::error_code error;
+      size_t len = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
+      if (error) {
+          ROS_ERROR("UDP receive error: %s", error.message().c_str());
+          continue; // ループを継続して受信を続ける
+      }
+      ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_buf.data());
+
     }
 
+    ros::spin();
+
     return 0;
-}
-```
+}```
 
 Then, edit `MakeLists.txt`.
 
@@ -119,8 +121,8 @@ vim MakeLists.txt
 ```
 
 ```txt
-cmake_minimum_required(VERSION 2.8.3)
-project(my_udp_server)
+cmake_minimum_required(VERSION 3.0.2)
+project(udp_server)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -132,8 +134,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(my_udp_server src/my_udp_server.cpp)
-target_link_libraries(my_udp_server
+add_executable(udp_server src/udp_server_node.cpp)
+target_link_libraries(udp_server_node
   ${catkin_LIBRARIES}
 )
 ```
