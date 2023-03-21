@@ -6,19 +6,60 @@
 - `catkin`: v0.9.2
 - `ROS`(noetic): v1.16.0
 
+## Aim
+
+- Receive text messages Sent via UDP
+- Log the received text
+
+**Since it only has minimal functionality for receiving and logging output, significant modifications may be required depending on the requirements.**
+
 ## How to use this
 
-First of all, clone this repository to your `catkin_ws` and move to the root directory.
+1. Clone this repository to your `catkin_ws` and move to the root directory.
 
 ```shell
 git clone <git-repository-url> udp_server
+cd udp_server
 ```
 
-Then, build.
+2. Build
 
 ```shell
 catkin build --this
 ```
+
+3. Run UDP Server
+
+First, you have to check and remember your IP address(v4).
+
+```shell
+hostname -I
+```
+
+Open anorher terminal and run the Master.
+
+```shell
+roscore
+```
+
+While the Master is running, start the node.
+
+```shell
+rosrun udp_server udp_server_node
+```
+
+Now, your udp server is listening on `localhost:8888`!
+
+
+4. Send Text to the Server
+
+Here is an example of sending text from CLI. Open another terminal.
+
+```shell
+nc -u <target-ip-address> 8888  #use netcat to establish a connection
+```
+
+When you type some text and press the <key>Enter</key>, a log will appear on your terminal that runs udp server.
 
 ## What I did
 
@@ -69,92 +110,12 @@ sudo apt install ros-noetic-urg-node
 catkin create udp_server
 cd udp_server
 mkdir src
-vim udp_server_node.cpp
 ```
-
-Then edit `udp_server_node.cpp` like this.
-
-```cpp
-##include <ros/ros.h>
-#include <boost/asio.hpp>
-
-int main(int argc, char** argv)
-{
-    ros::init(argc, argv, "udp_server_node");
-    ros::NodeHandle nh("~");
-
-    std::string host = nh.param<std::string>("host", "localhost");
-    int port = nh.param<int>("port", 5000);
-
-    boost::asio::io_service io_service;
-    boost::asio::ip::udp::socket socket(io_service);
-    boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
-    socket.open(endpoint.protocol());
-    socket.bind(endpoint);
-
-    ROS_INFO("UDP server started on %s:%d", host.c_str(), port);
-
-    boost::array<char, 1024> recv_buf;
-    boost::asio::ip::udp::endpoint remote_endpoint;
-    while (ros::ok())
-    {
-      boost::system::error_code error;
-      size_t len = socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0, error);
-      if (error) {
-          ROS_ERROR("UDP receive error: %s", error.message().c_str());
-          continue; // ループを継続して受信を続ける
-      }
-      ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_buf.data());
-
-    }
-
-    ros::spin();
-
-    return 0;
-}```
-
-Then, edit `MakeLists.txt`.
+Then edit `udp_server_node.cpp` and `MakeLists.txt`.
 
 ```shell
-cd ..
-vim MakeLists.txt
+vim .
 ```
 
-```txt
-cmake_minimum_required(VERSION 3.0.2)
-project(udp_server)
+This time, I used `Boost` Library.
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-)
-
-catkin_package()
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
-add_executable(udp_server src/udp_server_node.cpp)
-target_link_libraries(udp_server_node
-  ${catkin_LIBRARIES}
-)
-```
-
-Then, build.
-
-```shell
-catkin build --this
-```
-
-Then, run.
-
-First, you have to open another terminal and run Master.
-
-```shell
-roscore
-```
-And then, run node.
-
-```shell
-rosrun udp_server ude_server_node
-```
