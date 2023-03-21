@@ -95,7 +95,7 @@ And edit like this.
 
 ```diff
 + source /opt/ros/noetic/setup.bash
-+ source ~/src/catkin_ws/devel/setup.bah
++ source ~/src/catkin_ws/devel/setup.bash
 ```
 
 Then, install urg-node
