@@ -2,16 +2,19 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <ros/ros.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Float32.h>
 #include <boost/asio.hpp>
 
 
 using boost::asio::ip::udp;
 
-int main()
+int main(int argc, char **argv)
 {
-    // ros::init(argc, argv, "udp_server_node");
-    // ros::NodeHandle nh("~");
-    
+    ros::init(argc, argv, "udp_server");
+    ros::NodeHandle n;
+    ros::Publisher publisher = n.advertise<std_msgs::Float32>("controller", 10);
+
     int port = 8888;
 
     boost::asio::io_service io_service;
@@ -23,13 +26,18 @@ int main()
 
     udp::endpoint remote_endpoint;
 
-    while (true)
+    while (ros::ok())
     {
       boost::array<char, 1024> recv_buf;
       size_t len = sock.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0);
       ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_buf.data());
 
+      std_msgs::Float32 msg;
+      std::stringstream ss;
+      ss << recv_buf.data();
+      msg.data = std::stof(ss.str());
+      publisher.publish(msg);
+      ros::spinOnce();
     }
-
     return 0;
 }
