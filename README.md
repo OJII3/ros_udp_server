@@ -12,8 +12,10 @@
 
 ## Aim
 
-- Receive text messages Sent via UDP
-- Log the received text
+- [x] Receive text messages Sent via UDP
+- [x] Log the received text
+- [x] publish with custom message type
+- [ ] reply
 
 **Since it only has minimal functionality for receiving and logging output, significant modifications may be required depending on the requirements.**
 
