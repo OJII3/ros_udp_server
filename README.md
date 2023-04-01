@@ -2,9 +2,13 @@
 
 ## Envitonment
 
-- `Ubuntu`(wsl2): v20.04
+- `Ubuntu`: v22.04
+- `Docker`(Base image `ros:noetic-robot`)
+- `VSCode`(with extenstion `Remote Development`)
 - `catkin`: v0.9.2
 - `ROS`(noetic): v1.16.0
+
+(In my opinion,) Ubuntu20.04 is the better environment.
 
 ## Aim
 
@@ -61,7 +65,9 @@ nc -u <target-ip-address> 8888  #use netcat to establish a connection
 
 When you type some text and press the <key>Enter</key>, a log will appear on your terminal that runs udp server.
 
-## What I did
+## What I did (Before using Docker)
+
+Basic Environment: Windows Subsystem for Linux 2 (wsl2), Ubuntu20.04
 
 ### Install ROS1
 
@@ -119,3 +125,8 @@ vim .
 
 This time, I used `Boost` Library.
 
+## What I did (for Docker Environment)
+
+Basic Envrionment: Ubuntu22.04
+
+I'll write about this later
