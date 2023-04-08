@@ -30,11 +30,12 @@ int main(int argc, char **argv)
     {
       boost::array<char, 1024> recv_buf;
       size_t len = sock.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0);
-      ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_buf.data());
+      std::string recv_str(recv_buf.data(), len);
+      ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_str.c_str());
 
       std_msgs::Float32 msg;
       std::stringstream ss;
-      ss << recv_buf.data();
+      ss << recv_str;
       msg.data = std::stof(ss.str());
       publisher.publish(msg);
       ros::spinOnce();
