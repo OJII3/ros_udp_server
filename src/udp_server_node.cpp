@@ -6,14 +6,7 @@
 #include <std_msgs/Float32.h>
 #include <boost/asio.hpp>
 
-
 using boost::asio::ip::udp;
-
-void signtHandler(int sig)
-{
-    ROS_INFO("Shutting down...");
-    ros::shutdown();
-}
 
 int main(int argc, char **argv)
 {
@@ -21,8 +14,6 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::Publisher publisher = n.advertise<std_msgs::Float32>("controller", 10);
     
-    signal(SIGINT, signtHandler);
-
     int local_port = 8888;
     int target_port = 8888;
 
@@ -34,6 +25,16 @@ int main(int argc, char **argv)
     ROS_INFO("UDP server started on localhost:%d", local_port);
 
     udp::endpoint remote_endpoint;
+    
+    // Ctrl+Cを受信したら終了する
+    boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
+    signals.async_wait([&io_service](const boost::system::error_code& error, int signal_number)
+    {
+        if (!error)
+        {
+            io_service.stop();
+        }
+    });
 
     while (ros::ok())
     {
@@ -53,7 +54,8 @@ int main(int argc, char **argv)
         } catch (char* e) {
             udp_socket.send_to(boost::asio::buffer("Error: Please send Message that can be converted to foat."), remote_endpoint);
         }
-            ros::spinOnce();
+        
+        ros::spinOnce();
     }
 
     return 0;
