@@ -9,11 +9,19 @@
 
 using boost::asio::ip::udp;
 
+void signtHandler(int sig)
+{
+    ROS_INFO("Shutting down...");
+    ros::shutdown();
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "udp_server");
     ros::NodeHandle n;
     ros::Publisher publisher = n.advertise<std_msgs::Float32>("controller", 10);
+    
+    signal(SIGINT, signtHandler);
 
     int local_port = 8888;
     int target_port = 8888;
