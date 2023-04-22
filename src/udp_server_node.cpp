@@ -8,11 +8,17 @@
 
 using boost::asio::ip::udp;
 
+void handle_subscribe (const std_msgs::String::ConstPtr& msg)
+{
+  ROS_INFO("I heard: [%s]", msg -> data.c_str());
+}
+
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "udp_server");
-    ros::NodeHandle n;
-    ros::Publisher publisher = n.advertise<std_msgs::Float32>("controller", 10);
+    ros::NodeHandle nh;
+    ros::Publisher publisher = nh.advertise<std_msgs::Float32>("controller", 10);
     
     int local_port = 8888;
     int target_port = 8888;
@@ -24,6 +30,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("UDP server started on localhost:%d", local_port);
 
+    // 初回受信以降、スマホコントローラーのIPアドレス・ポートを保持する
     udp::endpoint remote_endpoint;
     
     // Ctrl+Cを受信したら終了する
@@ -38,23 +45,25 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
-      boost::array<char, 1024> recv_buf;
-      size_t len = udp_socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0);
-      std::string recv_str(recv_buf.data(), len);
+        // udpの受信
+        boost::array<char, 1024> recv_buf;
+        size_t len = udp_socket.receive_from(boost::asio::buffer(recv_buf), remote_endpoint, 0);
+        std::string recv_str(recv_buf.data(), len);
 
-      ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_str.c_str());
+        ROS_INFO("Received data from %s:%d: %s", remote_endpoint.address().to_string().c_str(), remote_endpoint.port(), recv_str.c_str());
 
-        try {
-            std_msgs::Float32 msg;
-            std::stringstream ss;
-            ss << recv_str;
-            msg.data = std::stof(ss.str());
-            publisher.publish(msg);
-            udp_socket.send_to(boost::asio::buffer(recv_str), remote_endpoint);
-        } catch (char* e) {
-            udp_socket.send_to(boost::asio::buffer("Error: Please send Message that can be converted to foat."), remote_endpoint);
+        // ros topic へ publish
+        std_msgs::Float32 msg;
+        std::istringstream iss(recv_str.c_str());
+        int int_msg;
+        while(iss >> int_msg) {
+            msg.data = int_msg;
         }
-        
+        ROS_INFO("Publishing: %f", msg.data);
+        publisher.publish(msg);
+
+        udp_socket.send_to(boost::asio::buffer(recv_str), remote_endpoint);
+    
         ros::spinOnce();
     }
 
