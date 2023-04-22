@@ -135,8 +135,12 @@ docker pull ros:noetic-robot
 ```
 
 ```shell
-docker run -it --name ros-noetic --network host ros:noetic-robot
+docker run -it --name ros-noetic -p 8888:8888/udp 11311:11311 ros:noetic-robot
 ```
+
+You need to forward some ports so that you can use the host's ports in the container.
+
+In this case, you need to use port 8888 for udp server, and 11311 for defalut ros Master.
 
 ### Install tools
 
