@@ -1,24 +1,16 @@
+#include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Float32.h>
-#include <boost/asio.hpp>
 
 using boost::asio::ip::udp;
-
-void handle_subscribe (const std_msgs::String::ConstPtr& msg)
-{
-  ROS_INFO("I heard: [%s]", msg -> data.c_str());
-}
-
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "udp_server");
-    ros::NodeHandle nh;
-    ros::Publisher publisher = nh.advertise<std_msgs::Float32>("controller", 10);
     
     int local_port = 8888;
     int target_port = 8888;
@@ -32,6 +24,15 @@ int main(int argc, char **argv)
 
     // 初回受信以降、スマホコントローラーのIPアドレス・ポートを保持する
     udp::endpoint remote_endpoint;
+
+
+    auto topic_name = "conttoller";
+    ros::NodeHandle nh;
+    ros::Publisher publisher = nh.advertise<std_msgs::Float32>(topic_name, 10);
+    ros::Subscriber subscriber = nh.subscribe<std_msgs::Float32>(topic_name, 10, [&](const std_msgs::Float32::ConstPtr& msg) -> void {
+      std::string data("%s", msg->data);
+      udp_socket.send_to(boost::asio::buffer(data), remote_endpoint);
+    });
     
     // Ctrl+Cを受信したら終了する
     boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
