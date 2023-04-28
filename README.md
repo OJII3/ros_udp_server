@@ -4,20 +4,17 @@
 
 - `Ubuntu`: v22.04
 - `Docker`(Base image `ros:noetic-robot`)
-- `VSCode`(with extenstion `Remote Development`)
 - `catkin`: v0.9.2
 - `ROS`(noetic): v1.16.0
 
-(In my opinion,) Ubuntu20.04 is the better environment.
+(In my opinion,) Ubuntu20.04 is the much better environment.
 
 ## Aim
 
-- [x] Receive text messages Sent via UDP
-- [x] Log the received text
-- [x] publish with custom message type
-- [ ] reply
-
-**Since it only has minimal functionality for receiving and logging output, significant modifications may be required depending on the requirements.**
+- [x] Receive UDP messages from a smartphone (output to log)
+- [x] Publish the received message to the ros topic "controller"
+- [x] Subscribe the topic "controller" and send the message to the smartphone
+- [x] Custmoize the type of pub/sub messages
 
 ## How to use this
 
@@ -65,9 +62,9 @@ Here is an example of sending text from CLI. Open another terminal.
 nc -u <target-ip-address> 8888  #use netcat to establish a connection
 ```
 
-When you type some text and press the <key>Enter</key>, a log will appear on your terminal that runs udp server.
+The last goal is to send data from a smartphone. The smartphone app's repository is [here](https://github.com/ojii3/udp_controller_unity).
 
-## What I did (Before using Docker)
+## What I did - 1/2 (for WSL2 Environment)
 
 Basic Environment: Windows Subsystem for Linux 2 (wsl2), Ubuntu20.04
 
@@ -119,16 +116,42 @@ catkin create udp_server
 cd udp_server
 mkdir src
 ```
-Then edit `udp_server_node.cpp` and `MakeLists.txt`.
+Then edit `udp_server_node.cpp`, `MakeLists.txt`, and  `package.xml`.
 
-```shell
-vim .
-```
+This time, I used `Boost` Library for udp connection.
 
-This time, I used `Boost` Library.
-
-## What I did (for Docker Environment)
+## What I did - 2/2 (for Docker Environment)
 
 Basic Envrionment: Ubuntu22.04
 
-I'll write about this later
+### Install Docker
+
+You can do it by yourself. I just installed Docker Desktop, and didn't do anything for DockerHub.
+
+### Pull the ROS Image and Run to Create Container
+
+```shell
+docker pull ros:noetic-robot
+```
+
+```shell
+docker run -it --name ros-noetic -p 8888:8888/udp 11311:11311 ros:noetic-robot
+```
+
+You need to forward some ports so that you can use the host's ports in the container.
+
+In this case, you need to use port 8888 for udp server, and 11311 for defalut ros Master.
+
+### Install tools
+
+```shell
+apt update
+apt-get update
+apt-get install git
+apt-get install python3-catkin-tools
+apt-get install python3-rosnode
+```
+
+You should install other tools if you need, such as `vim`, `netcat`, `curl` etc.
+
+Other processes are the same as the WSL2 environment, but you have to setup git or ssh beforehands to develop on the container.

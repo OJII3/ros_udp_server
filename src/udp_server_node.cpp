@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("UDP server started on localhost:%d", local_port);
 
-    auto topic_name = "controller";
+    auto topic_name = "poleID";
     ros::NodeHandle nh;
     ros::Publisher publisher = nh.advertise<std_msgs::Float32>(topic_name, 10);
     ros::Subscriber subscriber = nh.subscribe<std_msgs::Float32>(topic_name, 10, [&](const std_msgs::Float32::ConstPtr& msg) -> void {
