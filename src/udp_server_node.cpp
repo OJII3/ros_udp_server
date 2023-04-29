@@ -22,7 +22,9 @@ using namespace std;
 using namespace boost::asio::ip;
 using namespace boost::algorithm;
 
-int openUSBSerial(int &fd) {
+int fd;
+
+void openUSBSerial() {
   // char device_name[] = "/dev/ttyUSB0"; / /UART用
   char device_name[] = "/dev/ttyACM0"; // MasterBoard
   fd = open(device_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -97,8 +99,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "udp_server");
 
   // USBシリアルポートのオープン
-  int fd;
-  fd = openUSBSerial(fd);
+  openUSBSerial();
 
   const int local_port = 8888;
   const int target_port = 8888;
