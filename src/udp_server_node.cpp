@@ -144,6 +144,7 @@ int main(int argc, char **argv) {
 
       if (recv_str.substr(0, 2) == "J.") {
         // if message is joystick input, write to USB serial
+        ROS_INFO("Joystick input received: %s", recv_str.substr(2).c_str());
         char start = 'S';
         uint8_t data = parseGamePadInput(recv_str.substr(2));
         char end = 'E';
