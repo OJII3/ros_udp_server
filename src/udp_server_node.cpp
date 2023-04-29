@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
@@ -16,7 +17,9 @@
 #include <termios.h>
 #include <unistd.h>
 
-using boost::asio::ip::udp;
+using namespace std;
+using namespace boost::asio::ip;
+using namespace boost::algorithm;
 
 int openUSBSerial(int &fd) {
   // char device_name[] = "/dev/ttyUSB0"; / /UART用
@@ -135,8 +138,9 @@ int main(int argc, char **argv) {
     size_t len = receive_socket.receive_from(boost::asio::buffer(recv_buf),
                                              remote_endpoint, 0);
     std::string recv_str(recv_buf.data(), len);
+    recv_str = trim_right_copy(recv_str);
 
-    if (len > 0) {
+    if (recv_str.length() > 0) {
 
       ROS_INFO("Received data from %s:%d: %s",
                remote_endpoint.address().to_string().c_str(),
@@ -144,7 +148,6 @@ int main(int argc, char **argv) {
 
       if (recv_str.substr(0, 2) == "J.") {
         // if message is joystick input, write to USB serial
-        ROS_INFO("Joystick input received: %s", recv_str.substr(2).c_str());
         char start = 'S';
         uint8_t data = parseGamePadInput(recv_str.substr(2));
         char end = 'E';
