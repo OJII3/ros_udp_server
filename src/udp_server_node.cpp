@@ -5,6 +5,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <cmath>
+#include <cstdint>
 #include <fcntl.h>
 #include <fstream>
 #include <functional>
@@ -23,7 +24,7 @@ using namespace boost::algorithm;
 
 int openUSBSerial(int &fd) {
   // char device_name[] = "/dev/ttyUSB0"; / /UART用
-  char device_name[] = "/dev/my_device"; // MasterBoard
+  char device_name[] = "/dev/ttyACM0"; // MasterBoard
   fd = open(device_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
   fcntl(fd, F_SETFL, 0);
   // load conf"iguration
@@ -151,10 +152,11 @@ int main(int argc, char **argv) {
         char start = 'S';
         uint8_t data = parseGamePadInput(recv_str.substr(2));
         char end = 'E';
-        char buf[sizeof(start) + sizeof(data) + sizeof(end)];
-        memcpy(buf, &start, sizeof(start));
-        memcpy(buf + sizeof(start), &data, sizeof(data));
-        memcpy(buf + sizeof(start) + sizeof(data), &end, sizeof(end));
+        char buf[sizeof(char) + sizeof(uint8_t) + sizeof(char)];
+        memcpy(buf, &start, sizeof(char));
+        memcpy(buf + sizeof(char), &data, sizeof(data));
+        memcpy(buf + sizeof(char) + sizeof(uint8_t), &end, sizeof(char));
+        ROS_INFO("fd: %d", fd);
         auto n = write(fd, buf, sizeof(buf));
       } else if (recv_str.substr(0, 2) == "P.") {
         // if message is number(poleID), publish to ros topic
