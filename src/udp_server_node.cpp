@@ -55,45 +55,6 @@ int openUSBSerial(int &fd) {
   return fd;
 }
 
-uint8_t parseGamePadInput(std::string inputdata) {
-  // C++ かけないのでクソコードだけどゆるして
-  // Unity側で定義したボタンの名前を入力すると、そのボタンの値を返す(やはりクソせっけい)
-  if (inputdata == "R3")
-    return uint8_t(0x0001);
-  else if (inputdata == "L3")
-    return uint8_t(0x0002);
-  else if (inputdata == "Selct")
-    return uint8_t(0x0004);
-  else if (inputdata == "Start")
-    return uint8_t(0x0008);
-  else if (inputdata == "R2")
-    return uint8_t(0x0010);
-  else if (inputdata == "L2")
-    return uint8_t(0x0020);
-  else if (inputdata == "R1")
-    return uint8_t(0x0040);
-  else if (inputdata == "L1")
-    return uint8_t(0x0080);
-  else if (inputdata == "Square")
-    return uint8_t(0x0100);
-  else if (inputdata == "Cross")
-    return uint8_t(0x0200);
-  else if (inputdata == "Circle")
-    return uint8_t(0x0400);
-  else if (inputdata == "Triangle")
-    return uint8_t(0x0800);
-  else if (inputdata == "DPadLeft")
-    return uint8_t(0x1000);
-  else if (inputdata == "DPadDown")
-    return uint8_t(0x2000);
-  else if (inputdata == "DPadRight")
-    return uint8_t(0x4000);
-  else if (inputdata == "DPadUp")
-    return uint8_t(0x8000);
-  else
-    return uint8_t(0x0000);
-}
-
 int main(int argc, char **argv) {
   ros::init(argc, argv, "udp_server");
 
