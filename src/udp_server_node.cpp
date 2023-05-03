@@ -158,8 +158,8 @@ int main(int argc, char **argv) {
 
         constexpr char startChar = 'S';
         constexpr char endChar = 'E';
-        constexpr uint8_t start = static_cast<uint8_t>(start);
-        constexpr uint8_t end = static_cast<uint8_t>(end);
+        constexpr uint8_t start = static_cast<uint8_t>(startChar);
+        constexpr uint8_t end = static_cast<uint8_t>(endChar);
 
         struct TopicIdentifier {
           std::pair<uint8_t, std::string> launcher;
