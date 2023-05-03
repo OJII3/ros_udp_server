@@ -22,87 +22,25 @@ using namespace std;
 using namespace boost::asio::ip;
 using namespace boost::algorithm;
 
-int fd;
-
-void openUSBSerial() {
-  // char device_name[] = "/dev/ttyUSB0"; / /UART用
-  char device_name[] = "/dev/ttyACM0"; // MasterBoard
-  fd = open(device_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
-  fcntl(fd, F_SETFL, 0);
-  // load conf"iguration
-  struct termios conf_tio;
-  tcgetattr(fd, &conf_tio);
-  // set baudrate
-  speed_t BAUDRATE = B115200;
-  cfsetispeed(&conf_tio, BAUDRATE);
-  cfsetospeed(&conf_tio, BAUDRATE);
-
-  // make raw mode
-  cfmakeraw(&conf_tio); // <<<<<<<<<<<<<
-
-  // non canonical, non echo back
-  conf_tio.c_lflag &= ~(ECHO | ICANON);
-  // non blocking
-  conf_tio.c_cc[VMIN] = 0;
-  conf_tio.c_cc[VTIME] = 0;
-  // store configuration
-  tcsetattr(fd, TCSANOW, &conf_tio);
-  // std::cerr<<"OPENED"<<std::endl;
-  std::cerr << "fd = " << fd << std::endl;
-  if (fd > 0)
-    std::cerr << "OPENED" << std::endl;
-  else
-    std::cerr << "CANNOT OPEN" << std::endl;
-  return fd;
-}
-
-uint8_t parseGamePadInput(std::string inputdata) {
-  // C++ かけないのでクソコードだけどゆるして
-  // Unity側で定義したボタンの名前を入力すると、そのボタンの値を返す(やはりクソせっけい)
-  if (inputdata == "R3")
-    return uint8_t(0x0001);
-  else if (inputdata == "L3")
-    return uint8_t(0x0002);
-  else if (inputdata == "Selct")
-    return uint8_t(0x0004);
-  else if (inputdata == "Start")
-    return uint8_t(0x0008);
-  else if (inputdata == "R2")
-    return uint8_t(0x0010);
-  else if (inputdata == "L2")
-    return uint8_t(0x0020);
-  else if (inputdata == "R1")
-    return uint8_t(0x0040);
-  else if (inputdata == "L1")
-    return uint8_t(0x0080);
-  else if (inputdata == "Square")
-    return uint8_t(0x0100);
-  else if (inputdata == "Cross")
-    return uint8_t(0x0200);
-  else if (inputdata == "Circle")
-    return uint8_t(0x0400);
-  else if (inputdata == "Triangle")
-    return uint8_t(0x0800);
-  else if (inputdata == "DPadLeft")
-    return uint8_t(0x1000);
-  else if (inputdata == "DPadDown")
-    return uint8_t(0x2000);
-  else if (inputdata == "DPadRight")
-    return uint8_t(0x4000);
-  else if (inputdata == "DPadUp")
-    return uint8_t(0x8000);
-  else
-    return uint8_t(0x0000);
-}
+// Unityから送られてくるコントローラーの入力例
+// (DuakShock3クラスから逆算している)
+// c0000C00050050050
+//
+// data_head: c
+// id: 000
+// buttons(16進数): 0C00
+// left_stick_x: 050 (0 ~ 100)
+// left_stick_y: 050 (0 ~ 100)
+// right_stick_x: 050 (0 ~ 100)
+// right_stick_y: 050 (0 ~ 100)
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "udp_server");
 
-  // USBシリアルポートのオープン
-  openUSBSerial();
-
   const int local_port = 8888;
   const int target_port = 8888;
+  auto topic_poleID = "poleID";
+  auto topic_serial = "serial";
 
   boost::asio::io_service io_service;
   io_service.run();
@@ -115,15 +53,20 @@ int main(int argc, char **argv) {
   udp::socket send_socket(io_service, remote_endpoint);
   ROS_INFO("UDP server started on localhost:%d", local_port);
 
-  // Publisher, Subscriberの設定
-  auto topic_poleID = "poleID";
+  // ポール用の Publisher, Subscriberの設定
   ros::NodeHandle nh;
   ros::Publisher publisher = nh.advertise<std_msgs::Float32>(topic_poleID, 10);
   ros::Subscriber subscriber = nh.subscribe<std_msgs::Float32>(
       topic_poleID, 10, [&](const std_msgs::Float32::ConstPtr &msg) -> void {
+        // subscribeしたメッセージを送信するコールバック関数
         std::string data("%s", msg->data);
         send_socket.send_to(boost::asio::buffer(data), remote_endpoint);
       });
+
+  // USBシリアル通信を行うインターフェース用のROSノードとの接続用の設定
+  ros::NodeHandle serial_nh;
+  ros::Publisher serial_pub =
+      serial_nh.advertise<std_msgs::String>(topic_serial, 100);
 
   // Ctrl+Cを受信したら終了する
   boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
@@ -140,7 +83,7 @@ int main(int argc, char **argv) {
     size_t len = receive_socket.receive_from(boost::asio::buffer(recv_buf),
                                              remote_endpoint, 0);
     std::string recv_str(recv_buf.data(), len);
-    recv_str = trim_right_copy(recv_str);
+    recv_str = trim_right_copy(recv_str); // 末尾の空白/改行を削除
 
     if (recv_str.length() > 0) {
 
@@ -148,17 +91,12 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), recv_str.c_str());
 
-      if (recv_str.substr(0, 2) == "J.") {
+      if (recv_str.substr(0, 1) == "c") {
         // if message is joystick input, write to USB serial
-        char start = 'S';
-        uint8_t data = parseGamePadInput(recv_str.substr(2));
-        char end = 'E';
-        char buf[sizeof(char) + sizeof(uint8_t) + sizeof(char)];
-        memcpy(buf, &start, sizeof(char));
-        memcpy(buf + sizeof(char), &data, sizeof(data));
-        memcpy(buf + sizeof(char) + sizeof(uint8_t), &end, sizeof(char));
-        ROS_INFO("fd: %d", fd);
-        auto n = write(fd, buf, sizeof(buf));
+
+        std_msgs::ByteMultiArray msg;
+        msg.data = recv_str;
+
       } else if (recv_str.substr(0, 2) == "P.") {
         // if message is number(poleID), publish to ros topic
         std_msgs::Float32 msg;

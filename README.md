@@ -53,7 +53,6 @@ rosrun udp_server udp_server_node
 
 Now, your udp server is listening on `localhost:8888`!
 
-
 4. Send Text to the Server
 
 Here is an example of sending text from CLI. Open another terminal.
@@ -93,7 +92,7 @@ catkin build
 ```
 
 ```shell
-vim ~/.bashrc 
+vim ~/.bashrc
 ```
 
 And edit like this.
@@ -116,7 +115,8 @@ catkin create udp_server
 cd udp_server
 mkdir src
 ```
-Then edit `udp_server_node.cpp`, `MakeLists.txt`, and  `package.xml`.
+
+Then edit `udp_server_node.cpp`, `MakeLists.txt`, and `package.xml`.
 
 This time, I used `Boost` Library for udp connection.
 
@@ -155,3 +155,7 @@ apt-get install python3-rosnode
 You should install other tools if you need, such as `vim`, `netcat`, `curl` etc.
 
 Other processes are the same as the WSL2 environment, but you have to setup git or ssh beforehands to develop on the container.
+
+## References
+
+- [Linux でシリアル通信をしようとした話 - Qiita](https://qiita.com/sttn/items/567c9f49b88ff275b51a)
