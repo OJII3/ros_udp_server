@@ -131,8 +131,8 @@ int main(int argc, char **argv) {
         auto topicIdentifier = TopicIdentifier{
             {0x01, "launcher"}, {0x02, "path"}, {0x03, "joycon"}};
 
-        std_msgs::ByteMultiArrayPtr =
-            data boost::make_shared<std_msgs::ByteMultiArray>();
+        std_msgs::ByteMultiArrayPtr data =
+            boost::make_shared<std_msgs::ByteMultiArray>();
         data->data.reserve(msg->data.size() + 5);
         data->data.push_back(start);
         data->data.push_back(start);
