@@ -11,6 +11,7 @@
 #include <functional>
 #include <queue>
 #include <ros/ros.h>
+#include <std_msgs/ByteMultiArray.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
 #include <string>
