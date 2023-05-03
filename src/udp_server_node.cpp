@@ -156,8 +156,8 @@ int main(int argc, char **argv) {
           msg.data[i] = recv_str[i];
         }
 
-        constexpr char start = 'S';
-        constexpr char end = 'E';
+        constexpr char startChar = 'S';
+        constexpr char endChar = 'E';
         constexpr uint8_t start = static_cast<uint8_t>(start);
         constexpr uint8_t end = static_cast<uint8_t>(end);
 
