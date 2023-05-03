@@ -96,10 +96,12 @@ int main(int argc, char **argv) {
         // if message is joystick input, write to USB serial
 
         std_msgs::ByteMultiArray msg;
-        msg.data = recv_str;
+        auto data_array = vector<uint8_t>(recv_str.begin(), recv_str.end());
+        msg.data = data_array;
 
       } else if (recv_str.substr(0, 2) == "P.") {
         // if message is number(poleID), publish to ros topic
+
         std_msgs::Float32 msg;
         std::istringstream iss(recv_str.substr(2).c_str());
         int int_msg;
