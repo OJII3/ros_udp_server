@@ -12,6 +12,7 @@
 #include <queue>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/MultiByteArray.h>
 #include <std_msgs/String.h>
 #include <string>
 #include <sys/socket.h>
@@ -147,11 +148,16 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), recv_str.c_str());
 
-      if (recv_str.substr(0, 2) == "J.") {
+      if (recv_str.substr(0, 1) == "c") {
         // if message is joystick input, write to USB serial
-        char start = 'S';
-        uint8_t data = parseGamePadInput(recv_str.substr(2));
-        char end = 'E';
+        stds_msgs::MultiByteArray msg;
+        msg.data.resize(recv_str.length());
+        for (int i = 0; i < recv_str.length(); i++) {
+          msg.data[i] = recv_str[i];
+        }
+
+        char start = 'SS';
+        char end = 'EE';
         char buf[sizeof(char) + sizeof(uint8_t) + sizeof(char)];
         memcpy(buf, &start, sizeof(char));
         memcpy(buf + sizeof(char), &data, sizeof(data));
