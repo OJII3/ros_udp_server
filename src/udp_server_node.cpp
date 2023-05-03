@@ -150,13 +150,13 @@ int main(int argc, char **argv) {
 
       if (recv_str.substr(0, 1) == "c") {
         // if message is joystick input, write to USB serial
-        stds_msgs::MultiByteArray msg;
+        stds_msgs::ByteMultiArray msg;
         msg.data.resize(recv_str.length());
         for (int i = 0; i < recv_str.length(); i++) {
           msg.data[i] = recv_str[i];
         }
 
-        contstexpr char start = 'S';
+        constexpr char start = 'S';
         constexpr char end = 'E';
         constexpr uint8_t start = static_cast<uint8_t>(start);
         constexpr uint8_t end = static_cast<uint8_t>(end);
