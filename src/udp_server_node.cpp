@@ -156,14 +156,33 @@ int main(int argc, char **argv) {
           msg.data[i] = recv_str[i];
         }
 
-        char start = 'SS';
-        char end = 'EE';
-        char buf[sizeof(char) + sizeof(uint8_t) + sizeof(char)];
-        memcpy(buf, &start, sizeof(char));
-        memcpy(buf + sizeof(char), &data, sizeof(data));
-        memcpy(buf + sizeof(char) + sizeof(uint8_t), &end, sizeof(char));
-        ROS_INFO("fd: %d", fd);
-        auto n = write(fd, buf, sizeof(buf));
+        contstexpr char start = 'S';
+        constexpr char end = 'E';
+        constexpr uint8_t start = static_cast<uint8_t>(start);
+        constexpr uint8_t end = static_cast<uint8_t>(end);
+
+        struct TopicIdentifier {
+          std::pair<uint8_t, std::string> launcher;
+          std::pair<uint8_t, std::string> path;
+          std::pair<uint8_t, std::string> joycon;
+        };
+
+        auto topicIdentifier = TopicIdentifier{
+            {0x01, "launcher"}, {0x02, "path"}, {0x03, "joycon"}};
+
+        std_msgs::ByteMultiArrayPtr =
+            boost::make_shared<std_msgs::ByteMultiArray>();
+        data->data.reserve(msg->data.size() + 5);
+        data->data.push_back(start);
+        data->data.push_back(start);
+        data->data.push_back(tonicIdentifier.first);
+        data->data.push_back(data->data.end(), msg->data.begin(),
+                             msg->data.end());
+        data->data.push_back(end);
+        data->data.push_back(end);
+
+        write(fd, data->data.data(), data->data.size());
+
       } else if (recv_str.substr(0, 2) == "P.") {
         // if message is number(poleID), publish to ros topic
         std_msgs::Float32 msg;
