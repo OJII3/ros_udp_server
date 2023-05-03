@@ -100,7 +100,10 @@ int main(int argc, char **argv) {
           msg.data[i] = recv_str[i];
         }
 
-        ROS_INFO("Publishing to %s: %i", topic_serial, msg.data);
+        ROS_INFO("Publishing to %s: %d, %d, %d, %d, %d, %d, %d, %d, %d",
+                 topic_serial, msg.data[0], msg.data[1], msg.data[2],
+                 msg.data[3], msg.data[4], msg.data[5], msg.data[6],
+                 msg.data[7], msg.data[8]);
         serial_pub.publish(msg);
 
       } else if (recv_str.substr(0, 2) == "P.") {
