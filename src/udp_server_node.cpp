@@ -89,17 +89,18 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), receive_str.c_str());
 
-      if (receive_byte_arr[0] == "J") {
+      char constexpr data_head_joycon = "J";
+
+      if (receive_byte_arr[0] == bit_cast<uint8_t>(data_head_joycon) {
         // if message is joystick input, write to USB serial
 
         std_msgs::ByteMultiArray msg;
-        msg.data.resize(receive_str.length());
-        for (int i = 0; i < receive_byte_arr.data.size(); i++) {
-          msg.data[i] = receive_str[i];
+        msg.data.resize(receive_byte_arr.size() - 1);
+        for (int i = 1; i < receive_byte_arr.size(); i++) {
+          msg.data[i] = receive_byte_arr[i]
         }
 
         serial_pub.publish(msg);
-
       } else if (receive_str.substr(0, 2) == "P.") {
         // if message is number(poleID), publish to ros topic
 
