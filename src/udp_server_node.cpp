@@ -1,3 +1,4 @@
+#include <array>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
@@ -5,9 +6,11 @@
 #include <boost/asio/ip/address.hpp>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <fcntl.h>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <queue>
 #include <ros/ros.h>
 #include <std_msgs/ByteMultiArray.h>
@@ -74,15 +77,11 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
     // udpの受信
     boost::array<uint8_t, 128> receive_byte_arr;
-    size_t len = receive_socket.receive_from(
-        boost::asio::buffer(receive_byte_arr), remote_endpoint, 0);
-
     auto receive_char_arr = bit_cast<std::array<char, 128>>(receive_byte_arr);
     auto receive_str =
         std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
-    receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
 
-    cout << receive_char_arr.data() << ", " << receive_str << endl;
+    receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
 
     if (receive_str.length() > 0) {
 
@@ -90,19 +89,15 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), receive_str.c_str());
 
-      if (receive_str.substr(0, 1) == "c") {
+      if (receive_byte_arr[0] == "J") {
         // if message is joystick input, write to USB serial
 
         std_msgs::ByteMultiArray msg;
         msg.data.resize(receive_str.length());
-        for (int i = 0; i < receive_str.length(); i++) {
+        for (int i = 0; i < receive_byte_arr.data.size(); i++) {
           msg.data[i] = receive_str[i];
         }
 
-        ROS_INFO("Publishing to %s: %d, %d, %d, %d, %d, %d, %d, %d, %d",
-                 topic_serial, msg.data[0], msg.data[1], msg.data[2],
-                 msg.data[3], msg.data[4], msg.data[5], msg.data[6],
-                 msg.data[7], msg.data[8]);
         serial_pub.publish(msg);
 
       } else if (receive_str.substr(0, 2) == "P.") {
