@@ -89,9 +89,7 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), receive_str.c_str());
 
-      char data_head_joycon = "J";
-
-      if (receive_byte_arr[0] == bit_cast<uint8_t>(data_head_joycon) {
+      if (receive_byte_arr[0] == bit_cast<uint8_t>(char("J")) {
         // if message is joystick input, write to USB serial
 
         std_msgs::ByteMultiArray msg;
