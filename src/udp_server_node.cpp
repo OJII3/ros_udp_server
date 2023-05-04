@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
     auto receive_str =
         std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
 
-    receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
+    /* receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除 */
 
     if (receive_byte_arr.size() > 0) {
 
