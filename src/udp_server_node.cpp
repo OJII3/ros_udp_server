@@ -123,7 +123,8 @@ int main(int argc, char **argv) {
       }
     }
 
-    ros::spin();
+    ros::spinOnce();
+    ros::Duration(0.01).sleep();
   }
 
   io_service.stop();
