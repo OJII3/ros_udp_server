@@ -89,7 +89,8 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), receive_str.c_str());
 
-      if (receive_byte_arr[0] == bit_cast<uint8_t>(char("J")) {
+      // check if first byte encoded is "J"
+      if (receive_byte_arr[0] == 74) {
         // if message is joystick input, write to USB serial
 
         std_msgs::ByteMultiArray msg;
@@ -97,6 +98,8 @@ int main(int argc, char **argv) {
         for (int i = 1; i < receive_byte_arr.size(); i++) {
           msg.data[i] = receive_byte_arr[i]
         }
+
+        ROS_INFO("Publishing to serial_joycon");
 
         serial_pub.publish(msg);
       } else if (receive_str.substr(0, 2) == "P.") {
