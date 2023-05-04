@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
           msg.data[i] = receive_byte_arr[i];
         }
 
-        ROS_INFO("Publishing to serial_joycon");
+        ROS_INFO("publihing: %s", msg.data.data());
 
         serial_pub.publish(msg);
       } else if (receive_str.substr(0, 2) == "P.") {
