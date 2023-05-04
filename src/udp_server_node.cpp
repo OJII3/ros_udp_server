@@ -22,24 +22,11 @@ using namespace std;
 using namespace boost::asio::ip;
 using namespace boost::algorithm;
 
-template<typename To, typename From>
-To bit_cast(const From& from ) noexcept {
+template <typename To, typename From> To bit_cast(const From &from) noexcept {
   To result;
   std::memcpy(&result, &from, sizeof(To));
   return result;
 }
-
-// Unityから送られてくるコントローラーの入力例
-// (DuakShock3クラスから逆算している)
-// c0000C00050050050
-//
-// data_head: c
-// id: 000
-// buttons(16進数): 0C00
-// left_stick_x: 050 (0 ~ 100)
-// left_stick_y: 050 (0 ~ 100)
-// right_stick_x: 050 (0 ~ 100)
-// right_stick_y: 050 (0 ~ 100)
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "udp_server");
@@ -47,7 +34,7 @@ int main(int argc, char **argv) {
   const int local_port = 8888;
   const int target_port = 8888;
   auto topic_poleID = "poleID";
-  auto topic_serial = "serial";
+  auto topic_serial = "serial_joycon";
 
   boost::asio::io_service io_service;
   io_service.run();
@@ -86,12 +73,14 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     // udpの受信
-    boost::array<uint8_t, 1024> receive_byte_arr;
-    size_t len = receive_socket.receive_from(boost::asio::buffer(receive_byte_arr),
-                                             remote_endpoint, 0);
+    boost::array<uint8_t, 128> receive_byte_arr;
+    size_t len = receive_socket.receive_from(
+        boost::asio::buffer(receive_byte_arr), remote_endpoint, 0);
 
     auto receive_char_arr = bit_cast<std::array<char, 128>>(receive_byte_arr);
-    auto receive_str = std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
+    cout << receive_char_arr.data() << endl;
+    auto receive_str =
+        std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
     receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
 
     if (receive_str.length() > 0) {
