@@ -94,6 +94,11 @@ int main(int argc, char **argv) {
                remote_endpoint.address().to_string().c_str(),
                remote_endpoint.port(), receive_str.c_str());
 
+      ROS_INFO("publihing: %d, %d, %d, %d, %d, %d, %d, %d, %d",
+               receive_byte_arr[1], receive_byte_arr[2], receive_byte_arr[3],
+               receive_byte_arr[4], receive_byte_arr[5], receive_byte_arr[6],
+               receive_byte_arr[7], receive_byte_arr[8], receive_byte_arr[9]);
+
       // check if first byte encoded is "J"
       if (receive_byte_arr[0] == 74) {
         // if message is joystick input, write to USB serial
@@ -103,8 +108,6 @@ int main(int argc, char **argv) {
         for (int i = 1; i < receive_byte_arr.size(); i++) {
           msg.data[i] = receive_byte_arr[i];
         }
-
-        ROS_INFO("publihing: %s", msg.data.data().c_str());
 
         serial_pub.publish(msg);
       } else if (receive_str.substr(0, 2) == "P.") {
