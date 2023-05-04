@@ -78,10 +78,11 @@ int main(int argc, char **argv) {
         boost::asio::buffer(receive_byte_arr), remote_endpoint, 0);
 
     auto receive_char_arr = bit_cast<std::array<char, 128>>(receive_byte_arr);
-    cout << receive_char_arr.data() << endl;
     auto receive_str =
         std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
     receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
+
+    cout << receive_char_arr.data() << ", " << receive_str << endl;
 
     if (receive_str.length() > 0) {
 
