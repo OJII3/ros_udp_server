@@ -22,6 +22,13 @@ using namespace std;
 using namespace boost::asio::ip;
 using namespace boost::algorithm;
 
+template<typename To, typename From>
+To bit_cast(const From& from ) noexcept {
+  To result;
+  std::memcpy(&result, &from, sizeof(To));
+  return result;
+}
+
 // Unityから送られてくるコントローラーの入力例
 // (DuakShock3クラスから逆算している)
 // c0000C00050050050
@@ -79,25 +86,27 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     // udpの受信
-    boost::array<char, 1024> recv_buf;
-    size_t len = receive_socket.receive_from(boost::asio::buffer(recv_buf),
+    boost::array<uint8_t, 1024> receive_byte_arr;
+    size_t len = receive_socket.receive_from(boost::asio::buffer(receive_byte_arr),
                                              remote_endpoint, 0);
-    std::string recv_str(recv_buf.data(), len);
-    recv_str = trim_right_copy(recv_str); // 末尾の空白/改行を削除
 
-    if (recv_str.length() > 0) {
+    auto receive_char_arr = bit_cast<std::array<char, 128>>(receive_byte_arr);
+    auto receive_str = std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
+    receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
+
+    if (receive_str.length() > 0) {
 
       ROS_INFO("Received data from %s:%d: %s",
                remote_endpoint.address().to_string().c_str(),
-               remote_endpoint.port(), recv_str.c_str());
+               remote_endpoint.port(), receive_str.c_str());
 
-      if (recv_str.substr(0, 1) == "c") {
+      if (receive_str.substr(0, 1) == "c") {
         // if message is joystick input, write to USB serial
 
         std_msgs::ByteMultiArray msg;
-        msg.data.resize(recv_str.length());
-        for (int i = 0; i < recv_str.length(); i++) {
-          msg.data[i] = recv_str[i];
+        msg.data.resize(receive_str.length());
+        for (int i = 0; i < receive_str.length(); i++) {
+          msg.data[i] = receive_str[i];
         }
 
         ROS_INFO("Publishing to %s: %d, %d, %d, %d, %d, %d, %d, %d, %d",
@@ -106,11 +115,11 @@ int main(int argc, char **argv) {
                  msg.data[7], msg.data[8]);
         serial_pub.publish(msg);
 
-      } else if (recv_str.substr(0, 2) == "P.") {
+      } else if (receive_str.substr(0, 2) == "P.") {
         // if message is number(poleID), publish to ros topic
 
         std_msgs::Float32 msg;
-        std::istringstream iss(recv_str.substr(2).c_str());
+        std::istringstream iss(receive_str.substr(2).c_str());
         int int_msg;
         while (iss >> int_msg) {
           msg.data = int_msg;
