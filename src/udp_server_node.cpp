@@ -113,6 +113,8 @@ int main(int argc, char **argv) {
         }
         // ros topic へ publish
         publisher.publish(msg);
+      } else {
+        ROS_INFO("Received unknown message");
       }
     }
 
