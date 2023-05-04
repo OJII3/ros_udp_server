@@ -65,14 +65,17 @@ int main(int argc, char **argv) {
   ros::Publisher serial_pub =
       serial_nh.advertise<std_msgs::String>(topic_serial, 100);
 
-  // Ctrl+Cを受信したら終了する
-  boost::asio::signal_set signals(io_service, SIGINT, SIGTERM);
-  signals.async_wait(
-      [&io_service](const boost::system::error_code &error, int signal_number) {
-        if (!error) {
-          io_service.stop();
-        }
-      });
+  /* // Ctrl+Cで終了するための設定 */
+  /* signal(SIGINT, [&](int signum) -> void { */
+  /*   ROS_INFO("Received signal %d", signum); */
+  /*   io_service.stop(); */
+  /*   receive_socket.shutdown(receive_socket.shutdown_both); */
+  /*   send_socket.shutdown(send_socket.shutdown_both); */
+  /*   subscriber.shutdown(); */
+  /*   publisher.shutdown(); */
+  /*   serial_pub.shutdown(); */
+  /*   ros::shutdown(); */
+  /* }); */
 
   while (ros::ok()) {
     // udpの受信
@@ -118,7 +121,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    ros::spinOnce();
+    ros::spin();
   }
 
   io_service.stop();
