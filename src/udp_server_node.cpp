@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
         std_msgs::ByteMultiArray msg;
         msg.data.resize(receive_byte_arr.size() - 1);
         for (int i = 1; i < receive_byte_arr.size(); i++) {
-          msg.data[i] = receive_byte_arr[i]
+          msg.data[i] = receive_byte_arr[i];
         }
 
         ROS_INFO("Publishing to serial_joycon");
