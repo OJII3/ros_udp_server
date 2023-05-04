@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
     receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
 
-    if (receive_str.length() > 0) {
+    if (receive_byte_arr.size() > 0) {
 
       ROS_INFO("Received data from %s:%d: %s",
                remote_endpoint.address().to_string().c_str(),
