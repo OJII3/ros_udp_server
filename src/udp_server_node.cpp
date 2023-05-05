@@ -148,15 +148,14 @@ int main(int argc, char **argv) {
         auto topicIdentifier = TopicIdentifier{
             {0x01, "launcher"}, {0x02, "path"}, {0x03, "joycon"}};
 
-        std_msgs::ByteMultiArray data =
-            boost::make_shared<std_msgs::ByteMultiArray>();
-        data->data.reserve(msg.data.size() + 5);
-        data->data.push_back(start);
-        data->data.push_back(start);
-        data->data.push_back(topicIdentifier.joycon.first);
-        data->data.insert(data->data.end(), msg.data.begin(), msg.data.end());
-        data->data.push_back(end);
-        data->data.push_back(end);
+        auto data = std::make_shared<std_msgs::ByteMultiArray>(msg);
+        data.data.reserve(msg.data.size() + 5);
+        data.data.push_back(start);
+        data.data.push_back(start);
+        data.data.push_back(topicIdentifier.joycon.first);
+        data.data.insert(data.data.end(), msg.data.begin(), msg.data.end());
+        data.data.push_back(end);
+        data.data.push_back(end);
 
         write(fd, data->data.data(), data->data.size());
 
