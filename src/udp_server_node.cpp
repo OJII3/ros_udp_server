@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
       serial_nh.advertise<std_msgs::String>(topic_serial, 100);
 
   // Ctrl+Cで終了するための設定
-  std::function<void(int)> signal_handler = [&](int signum) -> void {
+  signal(SIGINT, [](int signum) {
     ROS_INFO("Received signal %d", signum);
     io_service.stop();
     receive_socket.shutdown(receive_socket.shutdown_both);
@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
     serial_pub.shutdown();
     ros::shutdown();
   });
-  signal(SIGINT, std::bind(signal_handler, std::placeholders::_1));
 
   while (ros::ok()) {
     // udpの受信
