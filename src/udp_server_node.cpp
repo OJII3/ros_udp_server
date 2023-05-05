@@ -149,13 +149,13 @@ int main(int argc, char **argv) {
             {0x01, "launcher"}, {0x02, "path"}, {0x03, "joycon"}};
 
         auto data = std::make_shared<std_msgs::ByteMultiArray>(msg);
-        data.reserve(msg.data.size() + 5);
-        data.push_back(start);
-        data.push_back(start);
-        data.push_back(topicIdentifier.joycon.first);
-        data.insert(data.data.end(), msg.data.begin(), msg.data.end());
-        data.push_back(end);
-        data.push_back(end);
+        data->data.reserve(msg.data.size() + 5);
+        data->data.push_back(start);
+        data->data.push_back(start);
+        data->data.push_back(topicIdentifier.joycon.first);
+        data->data.insert(data->data.end(), msg.data.begin(), msg.data.end());
+        data->data.push_back(end);
+        data->data.push_back(end);
 
         write(fd, data->data.data(), data->data.size());
 
