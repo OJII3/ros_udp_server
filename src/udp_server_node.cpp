@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
     // 改行コードが一緒に送られてきても放置する
 
-    if (receive_byte_arr.size() > 0) {
+    if (fd != -1 && receive_byte_arr.size() > 0) {
 
       if (receive_byte_arr[0] == 74) {
         // check if first byte is "J"(74), which means Joycon
