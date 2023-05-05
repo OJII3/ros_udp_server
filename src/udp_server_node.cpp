@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     serial_pub.shutdown();
     ros::shutdown();
   });
-  signal(SIGINT, signal_handler.target<__sighandler_t>());
+  signal(SIGINT, std::bind(signal_handler, std::placeholders::_1));
 
   while (ros::ok()) {
     // udpの受信
