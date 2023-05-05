@@ -159,8 +159,6 @@ int main(int argc, char **argv) {
 
         write(fd, data->data.data(), data->data.size());
 
-        ROS_INFO("write done, data size: %d", data->data.size());
-
       } else if (receive_byte_arr[0] == 80) {
         // check if first byte is "P"(80), which means Pole
         ROS_INFO("Pole: %d", receive_byte_arr[1]);
