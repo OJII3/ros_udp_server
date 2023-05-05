@@ -66,7 +66,8 @@ int main(int argc, char **argv) {
       serial_nh.advertise<std_msgs::String>(topic_serial, 100);
 
   // Ctrl+Cで終了するための設定
-  signal(SIGINT, [](int signum) {
+  // make sure to capture io_serveice, receive_socket, send_socket, subscriber,
+  signal(SIGINT, [&](int signum) -> void {
     ROS_INFO("Received signal %d", signum);
     io_service.stop();
     receive_socket.shutdown(receive_socket.shutdown_both);
