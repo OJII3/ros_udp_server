@@ -9,12 +9,20 @@
 
 (In my opinion,) Ubuntu20.04 is the much better environment.
 
-## Aim
+## Summary
 
-- [x] Receive UDP messages from a smartphone (output to log)
-- [x] Publish the received message to the ros topic "controller"
-- [x] Subscribe the topic "controller" and send the message to the smartphone
-- [x] Custmoize the type of pub/sub messages
+uint8_t の配列を UDP 通信で受け取る。配列の一つめの要素は、識別子で、それ以降の要素はデータとして扱う。
+
+- 識別子が "J" (= 74) の場合、データはジョイスティックの入力値として扱う。このとき、配列の長さは 8 である。
+- 識別子が "P" (= 80) の場合、データはパワーボタンの入力値として扱う。このとき、配列の長さは 2 である。
+
+改行コードなどが含まれていても放置する。
+
+- Joycon(DualShock3)の入力値は Unity の InputActions で受け取り、C#の byte(uint8_t)配列に変換して送信される。
+- この値から先頭の要素を取り除いた配列を、ROS から マイコンに書き込むためのノードに送る。
+
+- Pole の値は、配列の 2 番目の要素の数字(1~13)。
+- この値は、"poleID" というトピックに publish され、射出機構の制御の ROS ノードに送られる。
 
 ## How to use this
 

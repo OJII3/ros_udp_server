@@ -1,5 +1,6 @@
+// TODO: 受信も送信もするので、udp_client みたいな名前にしたい
+
 #include <array>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
@@ -16,14 +17,12 @@
 #include <std_msgs/ByteMultiArray.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
-#include <string>
 #include <sys/socket.h>
 #include <termios.h>
 #include <unistd.h>
 
 using namespace std;
 using namespace boost::asio::ip;
-using namespace boost::algorithm;
 
 template <typename To, typename From> To bit_cast(const From &from) noexcept {
   To result;
@@ -34,8 +33,8 @@ template <typename To, typename From> To bit_cast(const From &from) noexcept {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "udp_server");
 
-  const int local_port = 8888;
-  const int target_port = 8888;
+  constexpr int local_port = 8888;
+  constexpr int target_port = 8888;
   auto topic_poleID = "poleID";
   auto topic_serial = "serial_joycon";
 
@@ -50,7 +49,7 @@ int main(int argc, char **argv) {
   udp::socket send_socket(io_service, remote_endpoint);
   ROS_INFO("UDP server started on localhost:%d", local_port);
 
-  // ポール用の Publisher, Subscriberの設定
+  // 射出機構のノード用の Publisher, Subscriberの設定
   ros::NodeHandle nh;
   ros::Publisher publisher = nh.advertise<std_msgs::Float32>(topic_poleID, 10);
   ros::Subscriber subscriber = nh.subscribe<std_msgs::Float32>(
@@ -60,7 +59,7 @@ int main(int argc, char **argv) {
         send_socket.send_to(boost::asio::buffer(data), remote_endpoint);
       });
 
-  // USBシリアル通信を行うインターフェース用のROSノードとの接続用の設定
+  // マイコンと通信するノード用の Publisherの設定
   ros::NodeHandle serial_nh;
   ros::Publisher serial_pub =
       serial_nh.advertise<std_msgs::String>(topic_serial, 100);
@@ -76,49 +75,40 @@ int main(int argc, char **argv) {
   });
 
   while (ros::ok()) {
-    // udpの受信
     boost::array<uint8_t, 256> receive_byte_arr;
     receive_socket.receive_from(boost::asio::buffer(receive_byte_arr),
                                 remote_endpoint);
     auto receive_char_arr = bit_cast<std::array<char, 256>>(receive_byte_arr);
-    auto receive_str =
-        std::string(std::begin(receive_char_arr), std::end(receive_char_arr));
 
-    receive_str = trim_right_copy(receive_str); // 末尾の空白/改行を削除
+    // 改行コードが一緒に送られてきても放置する
 
     if (receive_byte_arr.size() > 0) {
 
-      ROS_INFO("Received data from %s:%d: %s",
-               remote_endpoint.address().to_string().c_str(),
-               remote_endpoint.port(), receive_str.c_str());
-
-      ROS_INFO("publihing: %d, %d, %d, %d, %d, %d, %d, %d, %d",
-               receive_byte_arr[0], receive_byte_arr[1], receive_byte_arr[2],
-               receive_byte_arr[3], receive_byte_arr[4], receive_byte_arr[5],
-               receive_byte_arr[6], receive_byte_arr[7], receive_byte_arr[8]);
-
-      // check if first byte encoded is "J"
       if (receive_byte_arr[0] == 74) {
-        // if message is joystick input, write to USB serial
+        // check if first byte is "J"(74), which means Joycon
+        // you should comment out the following line for better performance
+        ROS_INFO("Joycon: %d, %d, %d, %d, %d, %d, %d, %d, %d",
+                 receive_byte_arr[0], receive_byte_arr[1], receive_byte_arr[2],
+                 receive_byte_arr[3], receive_byte_arr[4], receive_byte_arr[5],
+                 receive_byte_arr[6], receive_byte_arr[7], receive_byte_arr[8]);
 
         std_msgs::ByteMultiArray msg;
         msg.data.resize(receive_byte_arr.size() - 1);
         for (int i = 1; i < receive_byte_arr.size(); i++) {
           msg.data[i] = receive_byte_arr[i];
         }
-
+        // "serial_joycon"というトピック名でメッセージをpubする
         serial_pub.publish(msg);
-      } else if (receive_str.substr(0, 2) == "P.") {
-        // if message is number(poleID), publish to ros topic
+
+      } else if (receive_byte_arr[0] == 80) {
+        // check if first byte is "P"(80), which means Pole
+        ROS_INFO("Pole: %d", receive_byte_arr[1]);
 
         std_msgs::Float32 msg;
-        std::istringstream iss(receive_str.substr(2).c_str());
-        int int_msg;
-        while (iss >> int_msg) {
-          msg.data = int_msg;
-        }
-        // ros topic へ publish
+        msg.data = receive_byte_arr[1];
+        // "poleID"というトピック名でメッセージをpubする
         publisher.publish(msg);
+
       } else {
         ROS_INFO("Received unknown message");
       }
