@@ -125,7 +125,6 @@ int main(int argc, char **argv) {
     }
 
     ros::spinOnce();
-    ros::Duration(0.001).sleep();
   }
 
   io_service.stop();
