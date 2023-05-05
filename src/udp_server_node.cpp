@@ -93,9 +93,9 @@ int main(int argc, char **argv) {
                remote_endpoint.port(), receive_str.c_str());
 
       ROS_INFO("publihing: %d, %d, %d, %d, %d, %d, %d, %d, %d",
-               receive_byte_arr[1], receive_byte_arr[2], receive_byte_arr[3],
-               receive_byte_arr[4], receive_byte_arr[5], receive_byte_arr[6],
-               receive_byte_arr[7], receive_byte_arr[8], receive_byte_arr[9]);
+               receive_byte_arr[0], receive_byte_arr[1], receive_byte_arr[2],
+               receive_byte_arr[3], receive_byte_arr[4], receive_byte_arr[5],
+               receive_byte_arr[6], receive_byte_arr[7], receive_byte_arr[8]);
 
       // check if first byte encoded is "J"
       if (receive_byte_arr[0] == 74) {
