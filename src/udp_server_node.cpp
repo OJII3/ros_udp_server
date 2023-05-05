@@ -30,8 +30,42 @@ template <typename To, typename From> To bit_cast(const From &from) noexcept {
   return result;
 }
 
+int openUSBSerial() {
+  // char device_name[] = "/dev/ttyUSB0"; / /UART用
+  char device_name[] = "/dev/ttyACM0"; // MasterBoard
+  int fd = open(device_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  fcntl(fd, F_SETFL, 0);
+  // load conf"iguration
+  struct termios conf_tio;
+  tcgetattr(fd, &conf_tio);
+  // set baudrate
+  speed_t BAUDRATE = B115200;
+  cfsetispeed(&conf_tio, BAUDRATE);
+  cfsetospeed(&conf_tio, BAUDRATE);
+
+  // make raw mode
+  cfmakeraw(&conf_tio); // <<<<<<<<<<<<<
+
+  // non canonical, non echo back
+  conf_tio.c_lflag &= ~(ECHO | ICANON);
+  // non blocking
+  conf_tio.c_cc[VMIN] = 0;
+  conf_tio.c_cc[VTIME] = 0;
+  // store configuration
+  tcsetattr(fd, TCSANOW, &conf_tio);
+  // std::cerr<<"OPENED"<<std::endl;
+  std::cerr << "fd = " << fd << std::endl;
+  if (fd > 0)
+    std::cerr << "OPENED" << std::endl;
+  else
+    std::cerr << "CANNOT OPEN" << std::endl;
+  return fd;
+}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "udp_server");
+
+  int fd = openUSBSerial();
 
   constexpr int local_port = 8888;
   constexpr int target_port = 8888;
@@ -99,6 +133,32 @@ int main(int argc, char **argv) {
         }
         // "serial_joycon"というトピック名でメッセージをpubする
         serial_pub.publish(msg);
+
+        constexpr char startChar = 'S';
+        constexpr char endChar = 'E';
+        constexpr uint8_t start = static_cast<uint8_t>(startChar);
+        constexpr uint8_t end = static_cast<uint8_t>(endChar);
+
+        struct TopicIdentifier {
+          std::pair<uint8_t, std::string> launcher;
+          std::pair<uint8_t, std::string> path;
+          std::pair<uint8_t, std::string> joycon;
+        };
+
+        auto topicIdentifier = TopicIdentifier{
+            {0x01, "launcher"}, {0x02, "path"}, {0x03, "joycon"}};
+
+        std_msgs::ByteMultiArray data =
+            boost::make_shared<std_msgs::ByteMultiArray>();
+        data->data.reserve(msg.data.size() + 5);
+        data->data.push_back(start);
+        data->data.push_back(start);
+        data->data.push_back(topicIdentifier.joycon.first);
+        data->data.insert(data->data.end(), msg.data.begin(), msg.data.end());
+        data->data.push_back(end);
+        data->data.push_back(end);
+
+        write(fd, data->data.data(), data->data.size());
 
       } else if (receive_byte_arr[0] == 80) {
         // check if first byte is "P"(80), which means Pole
