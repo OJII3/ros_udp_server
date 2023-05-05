@@ -67,17 +67,18 @@ int main(int argc, char **argv) {
 
   // Ctrl+Cで終了するための設定
   // make sure to capture io_serveice, receive_socket, send_socket, subscriber,
-  signal(SIGINT, [&](int signum) -> int {
-    ROS_INFO("Received signal %d", signum);
-    io_service.stop();
-    receive_socket.shutdown(receive_socket.shutdown_both);
-    send_socket.shutdown(send_socket.shutdown_both);
-    subscriber.shutdown();
-    publisher.shutdown();
-    serial_pub.shutdown();
-    ros::shutdown();
-    return 1;
-  });
+  signal(
+      SIGINT, [&](int signum) -> inline int {
+        ROS_INFO("Received signal %d", signum);
+        io_service.stop();
+        receive_socket.shutdown(receive_socket.shutdown_both);
+        send_socket.shutdown(send_socket.shutdown_both);
+        subscriber.shutdown();
+        publisher.shutdown();
+        serial_pub.shutdown();
+        ros::shutdown();
+        return 1;
+      });
 
   while (ros::ok()) {
     // udpの受信
