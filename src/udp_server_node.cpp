@@ -24,6 +24,7 @@
 using namespace std;
 using namespace boost::asio::ip;
 
+// 自前のbit_cast関数
 template <typename To, typename From> To bit_cast(const From &from) noexcept {
   To result;
   std::memcpy(&result, &from, sizeof(To));
@@ -75,7 +76,11 @@ int main(int argc, char **argv) {
   });
 
   while (ros::ok()) {
-    boost::array<uint8_t, 256> receive_byte_arr;
+    // ジョイコンの入力
+    // J, 1, buttons(4bit), butttons(4bit), buttons(4bit), buttons(4bit), leftPad_x, leftPad_y, rightPad_x, rightPad_y
+    // ポールの番号
+    // P, poleID
+    boost::array<uint8_t, 9> receive_byte_arr;
     receive_socket.receive_from(boost::asio::buffer(receive_byte_arr),
                                 remote_endpoint);
     auto receive_char_arr = bit_cast<std::array<char, 256>>(receive_byte_arr);

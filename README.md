@@ -11,18 +11,39 @@
 
 ## Summary
 
-uint8_t の配列を UDP 通信で受け取る。配列の一つめの要素は、識別子で、それ以降の要素はデータとして扱う。
-
-- 識別子が "J" (= 74) の場合、データはジョイスティックの入力値として扱う。このとき、配列の長さは 8 である。
-- 識別子が "P" (= 80) の場合、データはパワーボタンの入力値として扱う。このとき、配列の長さは 2 である。
+uint8_t の配列を UDP 通信で受け取る。UDP ポートは 8888。
 
 改行コードなどが含まれていても放置する。
 
-- Joycon(DualShock3)の入力値は Unity の InputActions で受け取り、C#の byte(uint8_t)配列に変換して送信される。
-- この値から先頭の要素を取り除いた配列を、ROS から マイコンに書き込むためのノードに送る。
+### ジョイコン(DualShock3)の入力
 
-- Pole の値は、配列の 2 番目の要素の数字(1~13)。
-- この値は、"poleID" というトピックに publish され、射出機構の制御の ROS ノードに送られる。
+スマホ(Unity)から受信
+
+```cpp
+["J"(=74), id(1), ボタンの状態(0 or 1)*4, ボタンの状態*4, ボタンの状態*4, ボタンの状態*4, leftPad_x(-50~50), leftPad_y, rightPad_x, rightPad_y]
+```
+
+ros_topic "serial_joycon" に送信(`std_msgs::byteMultiArray`)
+
+```cpp
+[id(1), ボタンの状態(0 or 1)*4, ボタンの状態*4, ボタンの状態*4, ボタンの状態*4, leftPad_x(-50~50), leftPad_y, rightPad_x, rightPad_y]
+```
+
+(`feature/usb` ブランチでは、USB で直接マイコンに送りつける機能もつけている。その際、どの USB ポートを使っているか調べ、ソースコードを修正,`sudo chmod 666 /path/to/usb` で権限をあたえてから)
+
+### ポールの番号
+
+スマホ(Unity)から受信
+
+```cpp
+["P"(=80), ポールの番号(1~13)]
+```
+
+ros_topic "poleID" に送信(`std_msgs::Float32`)
+
+```cpp
+ポールの番号(1~13)
+```
 
 ## How to use this
 
@@ -59,19 +80,19 @@ While the Master is running, start the node.
 rosrun udp_server udp_server_node
 ```
 
-Now, your udp server is listening on `localhost:8888`!
+4. Check the connection
 
-4. Send Text to the Server
-
-Here is an example of sending text from CLI. Open another terminal.
+- Test with `netcat`(use another device)
 
 ```shell
-nc -u <target-ip-address> 8888  #use netcat to establish a connection
+nc -u <your-ip-address> 8888
 ```
 
-The last goal is to send data from a smartphone. The smartphone app's repository is [here](https://github.com/ojii3/udp_controller_unity).
+- Send from Unity Application(use another device)
 
-## What I did - 1/2 (for WSL2 Environment)
+Please find my unity project from my github | gitlab repository.
+
+## What I did for preparation - 1/2 (for WSL2 Environment)
 
 Basic Environment: Windows Subsystem for Linux 2 (wsl2), Ubuntu20.04
 
@@ -128,7 +149,7 @@ Then edit `udp_server_node.cpp`, `MakeLists.txt`, and `package.xml`.
 
 This time, I used `Boost` Library for udp connection.
 
-## What I did - 2/2 (for Docker Environment)
+## What I did for preparation - 2/2 (for Docker Environment)
 
 Basic Envrionment: Ubuntu22.04
 
