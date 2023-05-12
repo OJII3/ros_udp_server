@@ -91,9 +91,10 @@ int main(int argc, char **argv) {
       auto received_bytes = udp_client.receiveFromJoycon();
 
       ROS_INFO("Received %d bytes, [%d, %d, %d, %d, %d, %d, %d, %d, ...]",
-               received_bytes.size(), received_bytes[0], received_bytes[1],
-               received_bytes[2], received_bytes[3], received_bytes[4],
-               received_bytes[5], received_bytes[6], received_bytes[7]);
+               bit_cast<uint8_t>(received_bytes.size()), received_bytes[0],
+               received_bytes[1], received_bytes[2], received_bytes[3],
+               received_bytes[4], received_bytes[5], received_bytes[6],
+               received_bytes[7]);
 
       if (received_bytes[0] == 80) { //"P"
         udp_client.sendToPoleIDNode(received_bytes[1]);
