@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   constexpr int local_port = 8888;
   constexpr int target_port = 8888;
   auto topic_poleID = "poleID";
-  auto topic_serial = "serial_joycon";
+  auto topic_serial = "udb_packet_to_micon";
 
   boost::asio::io_service io_service;
   io_service.run();
@@ -77,9 +77,8 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     // ジョイコンの入力
-    // J, 1, buttons(4bit), butttons(4bit), buttons(4bit), buttons(4bit), leftPad_x, leftPad_y, rightPad_x, rightPad_y
-    // ポールの番号
-    // P, poleID
+    // J, 1, buttons(4bit), butttons(4bit), buttons(4bit), buttons(4bit),
+    // leftPad_x, leftPad_y, rightPad_x, rightPad_y ポールの番号 P, poleID
     boost::array<uint8_t, 9> receive_byte_arr;
     receive_socket.receive_from(boost::asio::buffer(receive_byte_arr),
                                 remote_endpoint);
@@ -87,8 +86,6 @@ int main(int argc, char **argv) {
 
     // 改行コードが一緒に送られてきても放置する
 
-    if (fd == -1)
-      ROS_INFO("fd is -1, usb port is not open");
     if (receive_byte_arr.size() > 0) {
 
       if (receive_byte_arr[0] == 74) {
