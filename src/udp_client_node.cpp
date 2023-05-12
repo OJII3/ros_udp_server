@@ -6,7 +6,7 @@ template <typename To, typename From> To bit_cast(const From &from) noexcept {
   return result;
 }
 
-UDPClient::UDPClient() : nh_poleID(), nh_toUSB(), nh_joycon() {}
+UDPClient::UDPClient() : nh() {}
 
 UDPClient::~UDPClient() {
   send_socket.close();
@@ -34,9 +34,9 @@ void UDPClient::startPubSub(const std::string &topic_poleID,
                             const std::string &topic_toUSB,
                             const std::string &topic_toJoycon) {
 
-  pub_poleID = nh_poleID.advertise<std_msgs::Float32>(topic_poleID, 1);
-  pub_toUSB = nh_toUSB.advertise<std_msgs::ByteMultiArray>(topic_toUSB, 1);
-  sub_joycon = nh_joycon.subscribe<std_msgs::ByteMultiArray>(
+  pub_poleID = nh.advertise<std_msgs::Float32>(topic_poleID, 1);
+  pub_toUSB = nh.advertise<std_msgs::ByteMultiArray>(topic_toUSB, 1);
+  sub_joycon = nh.subscribe<std_msgs::ByteMultiArray>(
       topic_toJoycon, 10,
       [&](const std_msgs::ByteMultiArray::ConstPtr &msg) -> void {
         sendToJoycon(msg);

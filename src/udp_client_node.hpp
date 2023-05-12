@@ -1,5 +1,4 @@
 #pragma once
-
 #include <array>
 #include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
@@ -21,15 +20,13 @@
 #include <termios.h>
 #include <unistd.h>
 
-using namespace boost::asio::ip;
-
 // 3 parts:
 // to joycon(udp): subscribe to topic_toJoycon
 // from joycon(udp): publish to topic_toJoycon
 // from joycon(udp): publish to topic_poleID
 class UDPClient {
 public:
-  // initialize node handles
+  // initialize node handle
   UDPClient();
   ~UDPClient();
 
@@ -45,9 +42,7 @@ public:
   std::vector<uint8_t> receiveFromJoycon();
 
 private:
-  ros::NodeHandle nh_poleID;
-  ros::NodeHandle nh_toUSB;
-  ros::NodeHandle nh_joycon;
+  ros::NodeHandle nh;
 
   ros::Publisher pub_poleID;
   ros::Publisher pub_toUSB;
