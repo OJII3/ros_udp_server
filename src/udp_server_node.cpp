@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   constexpr int local_port = 8888;
   constexpr int target_port = 8888;
   auto topic_poleID = "poleID";
-  auto topic_serial = "udb_packet_to_micon";
+  auto topic_serial = "usb_packet_to_micon";
 
   boost::asio::io_service io_service;
   io_service.run();
