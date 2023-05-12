@@ -1,5 +1,7 @@
 #include "udp_client_node.hpp"
 
+using namespace boost::asio::ip;
+
 template <typename To, typename From> To bit_cast(const From &from) noexcept {
   To result;
   std::memcpy(&result, &from, sizeof(To));
