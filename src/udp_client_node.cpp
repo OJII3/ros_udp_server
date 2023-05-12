@@ -8,7 +8,7 @@ template <typename To, typename From> To bit_cast(const From &from) noexcept {
   return result;
 }
 
-UDPClient::UDPClient() : nh() {}
+UDPClient::UDPClient() : nh{} {}
 
 UDPClient::~UDPClient() {
   send_socket.close();
