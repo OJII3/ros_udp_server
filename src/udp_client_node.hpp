@@ -52,4 +52,4 @@ private:
   boost::asio::io_service io_service;
   boost::asio::ip::udp::socket send_socket;
   boost::asio::ip::udp::socket receive_socket;
-}
+};
