@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(udp_client)
+project(udp_server)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -104,7 +104,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS src
-  LIBRARIES udp_client
+  LIBRARIES udp_server
   CATKIN_DEPENDS roscpp std_msgs message_runtime
 #  DEPENDS system_lib
 )
@@ -123,7 +123,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/udp_client.cpp
+#   src/${PROJECT_NAME}/udp_server.cpp
 # )
 
 ## Add cmake target dependencies of the library
